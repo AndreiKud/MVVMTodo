@@ -21,7 +21,6 @@ buildscript {
         kotlinVersion = "1.5.30"
         ktxVersion = "1.6.0"
         lifecycleVersion = "2.4.0-alpha03"
-        materialVersion = "1.5.0-alpha03"
         navigationVersion = "2.3.5"
         roomVersion = "2.3.0"
         testExtJunitVersion = "1.1.3"
