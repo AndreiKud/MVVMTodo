@@ -39,6 +39,7 @@ android {
         jvmTarget = '1.8'
         // freeCompilerArgs += "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
     }
+    buildToolsVersion '31.0.0'
 }
 
 dependencies {
