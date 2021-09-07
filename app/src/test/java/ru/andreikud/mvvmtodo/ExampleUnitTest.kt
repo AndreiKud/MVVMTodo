@@ -1,4 +1,4 @@
-package com.codinginflow.mvvmtodo
+package ru.andreikud.mvvmtodo
 
 import org.junit.Test
 
