@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">MVVMTodo</string>
     <string name="fragment_tasks_add_new_task">Add new task</string>
+    <string name="important_tasks">Important tasks</string>
 </resources>

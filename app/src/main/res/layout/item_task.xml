@@ -26,16 +26,16 @@
         android:textColor="@color/black"
         android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/imImportance"
+        app:layout_constraintEnd_toStartOf="@id/ivImportance"
         app:layout_constraintStart_toEndOf="@+id/cbCompleted"
         app:layout_constraintTop_toTopOf="parent"
         tool:text="Example item" />
 
     <ImageView
-        android:id="@+id/imImportance"
+        android:id="@+id/ivImportance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:contentDescription="Important tasks"
+        android:contentDescription="@string/important_tasks"
         android:src="@drawable/ic_priority"
         app:layout_constraintBottom_toBottomOf="@id/tvItem"
         app:layout_constraintEnd_toEndOf="parent"
