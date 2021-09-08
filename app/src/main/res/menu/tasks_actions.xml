@@ -17,12 +17,12 @@
         <menu>
 
             <item
-                android:id="@+id/miSortByDate"
-                android:title="Sort by date" />
+                android:id="@+id/miSortByName"
+                android:title="Sort by name" />
 
             <item
-                android:id="@+id/miSortByImportance"
-                android:title="Sort by importance" />
+                android:id="@+id/miSortByDate"
+                android:title="Sort by date" />
 
         </menu>
 

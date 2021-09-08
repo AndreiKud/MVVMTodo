@@ -1,21 +1,27 @@
 package ru.andreikud.mvvmtodo.ui.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
+import android.widget.Checkable
+import android.widget.CheckedTextView
+import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.andreikud.mvvmtodo.R
 import com.andreikud.mvvmtodo.databinding.FragmentTasksListBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import ru.andreikud.mvvmtodo.ui.adapters.TasksAdapter
 import ru.andreikud.mvvmtodo.util.onQueryTextChanged
+import ru.andreikud.mvvmtodo.data.SortOrder
 import ru.andreikud.mvvmtodo.viewmodel.TasksViewModel
 
 @AndroidEntryPoint
@@ -52,6 +58,11 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list) {
                 viewModel.queryNameFilter.value = newText
             }
         }
+
+        val hideCompleted = menu.findItem(R.id.miHideAllCompleted)
+        viewLifecycleOwner.lifecycleScope.launch {
+            hideCompleted.isChecked = viewModel.preferences.first().hideCompleted
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -61,15 +72,18 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list) {
             }
             R.id.miHideAllCompleted -> {
                 item.isChecked = !item.isChecked
+                viewModel.onHideCompletedClicked(item.isChecked)
                 true
             }
             R.id.miDeleteAllCompleted -> {
                 true
             }
             R.id.miSortByDate -> {
+                viewModel.onSortOrderClicked(SortOrder.BY_DATE)
                 true
             }
-            R.id.miSortByImportance -> {
+            R.id.miSortByName -> {
+                viewModel.onSortOrderClicked(SortOrder.BY_NAME)
                 true
             }
             else -> super.onOptionsItemSelected(item)
