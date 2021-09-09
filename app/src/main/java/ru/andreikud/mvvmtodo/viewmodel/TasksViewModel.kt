@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 import ru.andreikud.mvvmtodo.data.PreferencesManager
 import ru.andreikud.mvvmtodo.data.SortOrder
 import ru.andreikud.mvvmtodo.data.dao.TaskDao
+import ru.andreikud.mvvmtodo.data.model.Task
 import javax.inject.Inject
 
 @HiltViewModel
@@ -39,6 +40,14 @@ class TasksViewModel @Inject constructor(
 
     fun onHideCompletedClicked(hideCompleted: Boolean) = viewModelScope.launch {
         preferencesManager.updateHideCompleted(hideCompleted)
+    }
+
+    fun onTaskSelected(item: Task) {
+
+    }
+
+    fun onCompletedStateChanged(item: Task, checked: Boolean) = viewModelScope.launch {
+        dao.update(item.copy(isCompleted = checked))
     }
 
     @ExperimentalCoroutinesApi

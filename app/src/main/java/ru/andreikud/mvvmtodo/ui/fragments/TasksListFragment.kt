@@ -1,5 +1,6 @@
 package ru.andreikud.mvvmtodo.ui.fragments
 
+import android.content.DialogInterface
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -9,9 +10,11 @@ import android.view.View
 import android.widget.Checkable
 import android.widget.CheckedTextView
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.andreikud.mvvmtodo.R
@@ -22,10 +25,11 @@ import kotlinx.coroutines.launch
 import ru.andreikud.mvvmtodo.ui.adapters.TasksAdapter
 import ru.andreikud.mvvmtodo.util.onQueryTextChanged
 import ru.andreikud.mvvmtodo.data.SortOrder
+import ru.andreikud.mvvmtodo.data.model.Task
 import ru.andreikud.mvvmtodo.viewmodel.TasksViewModel
 
 @AndroidEntryPoint
-class TasksListFragment : Fragment(R.layout.fragment_tasks_list) {
+class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.OnItemClickListener {
 
     private val viewModel: TasksViewModel by viewModels()
     private var binding: FragmentTasksListBinding? = null
@@ -34,7 +38,8 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentTasksListBinding.bind(view)
 
-        val taskAdapter = TasksAdapter()
+        val taskAdapter = TasksAdapter(this)
+        
         binding?.apply {
             rvTasks.apply {
                 adapter = taskAdapter
@@ -90,4 +95,11 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list) {
         }
     }
 
+    override fun onItemClick(item: Task) {
+        viewModel.onTaskSelected(item)
+    }
+
+    override fun onCheckBoxClick(item: Task, isChecked: Boolean) {
+        viewModel.onCompletedStateChanged(item, isChecked)
+    }
 }
