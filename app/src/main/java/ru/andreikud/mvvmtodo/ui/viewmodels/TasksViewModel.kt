@@ -1,8 +1,8 @@
-package ru.andreikud.mvvmtodo.viewmodel
+package ru.andreikud.mvvmtodo.ui.viewmodels
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -15,16 +15,19 @@ import ru.andreikud.mvvmtodo.data.model.Task
 import javax.inject.Inject
 
 sealed class TaskEvent {
+    object NavigateToAddTaskScreen : TaskEvent()
+    data class NavigateToEditTaskScreen(val task: Task): TaskEvent()
     data class TaskDeleted(val task: Task) : TaskEvent()
 }
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
     private val dao: TaskDao,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val queryNameFilter = MutableStateFlow("")
+    val queryNameFilter = savedStateHandle.getLiveData("searchQeury", "")
     val preferences = preferencesManager.preferencesFlow
 
     @ExperimentalCoroutinesApi
@@ -35,7 +38,7 @@ class TasksViewModel @Inject constructor(
 
     @ExperimentalCoroutinesApi
     private val filteredTasks = combine(
-        queryNameFilter,
+        queryNameFilter.asFlow(),
         preferences,
     ) { query, preferences ->
         Pair(query, preferences)
@@ -51,8 +54,8 @@ class TasksViewModel @Inject constructor(
         preferencesManager.updateHideCompleted(hideCompleted)
     }
 
-    fun onTaskSelected(item: Task) {
-
+    fun onTaskSelected(task: Task) = viewModelScope.launch {
+        eventsChannel.send(TaskEvent.NavigateToEditTaskScreen(task))
     }
 
     fun onCompletedStateChanged(item: Task, checked: Boolean) = viewModelScope.launch {
@@ -67,6 +70,10 @@ class TasksViewModel @Inject constructor(
 
     fun undoDeletion(task: Task) = viewModelScope.launch {
         dao.insert(task)
+    }
+
+    fun onTaskAddClick() = viewModelScope.launch {
+        eventsChannel.send(TaskEvent.NavigateToAddTaskScreen)
     }
 
     @ExperimentalCoroutinesApi

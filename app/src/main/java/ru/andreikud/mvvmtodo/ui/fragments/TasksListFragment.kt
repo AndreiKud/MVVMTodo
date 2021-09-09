@@ -1,21 +1,15 @@
 package ru.andreikud.mvvmtodo.ui.fragments
 
-import android.content.DialogInterface
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.widget.Checkable
-import android.widget.CheckedTextView
-import android.widget.TextView
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -30,8 +24,8 @@ import ru.andreikud.mvvmtodo.ui.adapters.TasksAdapter
 import ru.andreikud.mvvmtodo.util.onQueryTextChanged
 import ru.andreikud.mvvmtodo.data.SortOrder
 import ru.andreikud.mvvmtodo.data.model.Task
-import ru.andreikud.mvvmtodo.viewmodel.TaskEvent
-import ru.andreikud.mvvmtodo.viewmodel.TasksViewModel
+import ru.andreikud.mvvmtodo.ui.viewmodels.TaskEvent
+import ru.andreikud.mvvmtodo.ui.viewmodels.TasksViewModel
 
 @AndroidEntryPoint
 class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.OnItemClickListener {
@@ -65,6 +59,10 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.O
                     item?.let(viewModel::onTaskSwiped)
                 }
             }).attachToRecyclerView(rvTasks)
+
+            fabAddTask.setOnClickListener {
+                viewModel.onTaskAddClick()
+            }
         }
 
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
@@ -75,6 +73,21 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.O
                             .setAction("UNDO") {
                                 viewModel.undoDeletion(event.task)
                             }.show()
+                    }
+                    is TaskEvent.NavigateToAddTaskScreen -> {
+                        val action =
+                            TasksListFragmentDirections.actionTasksListFragmentToAddEditTaskFragment(
+                                "New Task"
+                            )
+                        findNavController().navigate(action)
+                    }
+                    is TaskEvent.NavigateToEditTaskScreen -> {
+                        val action =
+                            TasksListFragmentDirections.actionTasksListFragmentToAddEditTaskFragment(
+                                "EditTask",
+                                event.task
+                            )
+                        findNavController().navigate(action)
                     }
                 }
             }
