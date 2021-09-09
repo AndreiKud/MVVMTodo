@@ -16,16 +16,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.andreikud.mvvmtodo.R
 import com.andreikud.mvvmtodo.databinding.FragmentTasksListBinding
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import ru.andreikud.mvvmtodo.ui.adapters.TasksAdapter
 import ru.andreikud.mvvmtodo.util.onQueryTextChanged
 import ru.andreikud.mvvmtodo.data.SortOrder
 import ru.andreikud.mvvmtodo.data.model.Task
+import ru.andreikud.mvvmtodo.viewmodel.TaskEvent
 import ru.andreikud.mvvmtodo.viewmodel.TasksViewModel
 
 @AndroidEntryPoint
@@ -39,15 +44,41 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.O
         binding = FragmentTasksListBinding.bind(view)
 
         val taskAdapter = TasksAdapter(this)
-        
+
         binding?.apply {
             rvTasks.apply {
                 adapter = taskAdapter
                 layoutManager = LinearLayoutManager(requireContext())
                 setHasFixedSize(true)
             }
+
+            ItemTouchHelper(object :
+                ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT or ItemTouchHelper.LEFT) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean = false
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    val item = taskAdapter.currentList[viewHolder.adapterPosition]
+                    item?.let(viewModel::onTaskSwiped)
+                }
+            }).attachToRecyclerView(rvTasks)
         }
 
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is TaskEvent.TaskDeleted -> {
+                        Snackbar.make(requireView(), "Task was deleted", Snackbar.LENGTH_LONG)
+                            .setAction("UNDO") {
+                                viewModel.undoDeletion(event.task)
+                            }.show()
+                    }
+                }
+            }
+        }
         viewModel.tasks.observe(viewLifecycleOwner) { tasks ->
             taskAdapter.submitList(tasks)
         }

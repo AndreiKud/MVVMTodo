@@ -5,15 +5,18 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import ru.andreikud.mvvmtodo.data.PreferencesManager
 import ru.andreikud.mvvmtodo.data.SortOrder
 import ru.andreikud.mvvmtodo.data.dao.TaskDao
 import ru.andreikud.mvvmtodo.data.model.Task
 import javax.inject.Inject
+
+sealed class TaskEvent {
+    data class TaskDeleted(val task: Task) : TaskEvent()
+}
 
 @HiltViewModel
 class TasksViewModel @Inject constructor(
@@ -23,6 +26,12 @@ class TasksViewModel @Inject constructor(
 
     val queryNameFilter = MutableStateFlow("")
     val preferences = preferencesManager.preferencesFlow
+
+    @ExperimentalCoroutinesApi
+    private val eventsChannel = Channel<TaskEvent>()
+
+    @ExperimentalCoroutinesApi
+    val events = eventsChannel.receiveAsFlow()
 
     @ExperimentalCoroutinesApi
     private val filteredTasks = combine(
@@ -48,6 +57,16 @@ class TasksViewModel @Inject constructor(
 
     fun onCompletedStateChanged(item: Task, checked: Boolean) = viewModelScope.launch {
         dao.update(item.copy(isCompleted = checked))
+    }
+
+    @ExperimentalCoroutinesApi
+    fun onTaskSwiped(task: Task) = viewModelScope.launch {
+        dao.delete(task)
+        eventsChannel.send(TaskEvent.TaskDeleted(task))
+    }
+
+    fun undoDeletion(task: Task) = viewModelScope.launch {
+        dao.insert(task)
     }
 
     @ExperimentalCoroutinesApi
