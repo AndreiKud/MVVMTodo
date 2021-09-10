@@ -26,9 +26,7 @@ class TaskFilterPreference<T>(
     val value: T,
     private val defaultValue: T,
     private val dataStoreKey: String
-) {
-
-}
+)
 
 enum class SortOrder {
     BY_DATE,
