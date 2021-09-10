@@ -8,7 +8,7 @@ import ru.andreikud.mvvmtodo.data.SortOrder
 @Dao
 interface TaskDao {
 
-    fun query(filterStr: String, sortOrder: SortOrder, hideCompleted: Boolean): Flow<List<Task>> =
+    fun getTasks(filterStr: String, sortOrder: SortOrder, hideCompleted: Boolean): Flow<List<Task>> =
         when (sortOrder) {
             SortOrder.BY_DATE -> querySorted(filterStr, "dateCreatedInMs", hideCompleted)
             SortOrder.BY_NAME -> querySorted(filterStr, "name", hideCompleted)

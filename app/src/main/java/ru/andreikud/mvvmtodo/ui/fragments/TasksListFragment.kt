@@ -33,6 +33,8 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.O
 
     private val viewModel: TasksViewModel by viewModels()
     private var binding: FragmentTasksListBinding? = null
+    private lateinit var searchView: SearchView
+    private lateinit var searchItem: MenuItem
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -117,11 +119,16 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.O
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.tasks_actions, menu)
-        val searchView = menu.findItem(R.id.miSearch).actionView
-        if (searchView is SearchView) {
-            searchView.onQueryTextChanged { newText ->
-                viewModel.queryNameFilter.value = newText
-            }
+        searchItem = menu.findItem(R.id.miSearch)
+        searchView = searchItem.actionView as SearchView
+        val pendingQuery = viewModel.queryNameFilter.value
+        if (pendingQuery != null && pendingQuery.isNotEmpty()) {
+            searchItem.expandActionView()
+            searchView.setQuery(pendingQuery, false)
+        }
+
+        searchView.onQueryTextChanged { newText ->
+            viewModel.queryNameFilter.value = newText
         }
 
         val hideCompleted = menu.findItem(R.id.miHideAllCompleted)
@@ -162,5 +169,10 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.O
 
     override fun onCheckBoxClick(item: Task, isChecked: Boolean) {
         viewModel.onCompletedStateChanged(item, isChecked)
+    }
+
+    override fun onDestroyView() {
+        searchView.setOnQueryTextListener(null)
+        super.onDestroyView()
     }
 }
