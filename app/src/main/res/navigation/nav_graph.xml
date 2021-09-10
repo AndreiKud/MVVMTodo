@@ -28,4 +28,11 @@
             app:argType="ru.andreikud.mvvmtodo.data.model.Task"
             app:nullable="true" />
     </fragment>
+    <dialog
+        android:id="@+id/deleteAllCompletedDialogFragment"
+        android:name="ru.andreikud.mvvmtodo.ui.fragments.DeleteAllCompletedDialogFragment"
+        android:label="DeleteAllCompletedDialogFragment" />
+    <action
+        android:id="@+id/action_global_deleteAllCompletedDialogFragment"
+        app:destination="@id/deleteAllCompletedDialogFragment" />
 </navigation>

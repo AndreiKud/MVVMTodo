@@ -100,6 +100,11 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.O
                     is TaskEvent.ShowConfirmationMethod -> {
                         Snackbar.make(requireView(), event.msg, Snackbar.LENGTH_SHORT).show()
                     }
+                    is TaskEvent.ShowDeleteAllCompletedConfirmation -> {
+                        val action =
+                            DeleteAllCompletedDialogFragmentDirections.actionGlobalDeleteAllCompletedDialogFragment()
+                        findNavController().navigate(action)
+                    }
                 }
             }
         }
@@ -132,18 +137,19 @@ class TasksListFragment : Fragment(R.layout.fragment_tasks_list), TasksAdapter.O
             }
             R.id.miHideAllCompleted -> {
                 item.isChecked = !item.isChecked
-                viewModel.onHideCompletedClicked(item.isChecked)
+                viewModel.onHideCompletedClick(item.isChecked)
                 true
             }
             R.id.miDeleteAllCompleted -> {
+                viewModel.onDeleteAllCompletedClick()
                 true
             }
             R.id.miSortByDate -> {
-                viewModel.onSortOrderClicked(SortOrder.BY_DATE)
+                viewModel.onSortOrderClick(SortOrder.BY_DATE)
                 true
             }
             R.id.miSortByName -> {
-                viewModel.onSortOrderClicked(SortOrder.BY_NAME)
+                viewModel.onSortOrderClick(SortOrder.BY_NAME)
                 true
             }
             else -> super.onOptionsItemSelected(item)

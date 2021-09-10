@@ -1,8 +1,6 @@
 package ru.andreikud.mvvmtodo.ui.viewmodels
 
 import androidx.lifecycle.*
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -16,6 +14,7 @@ import ru.andreikud.mvvmtodo.util.Constants
 import javax.inject.Inject
 
 sealed class TaskEvent {
+    object ShowDeleteAllCompletedConfirmation: TaskEvent()
     object NavigateToAddTaskScreen : TaskEvent()
     data class NavigateToEditTaskScreen(val task: Task) : TaskEvent()
     data class TaskDeleted(val task: Task) : TaskEvent()
@@ -45,14 +44,14 @@ class TasksViewModel @Inject constructor(
     ) { query, preferences ->
         Pair(query, preferences)
     }.flatMapLatest { (query, preferences) ->
-        dao.query(query, preferences.sortOrder, preferences.hideCompleted)
+        dao.getTasks(query, preferences.sortOrder, preferences.hideCompleted)
     }
 
-    fun onSortOrderClicked(sortOrder: SortOrder) = viewModelScope.launch {
+    fun onSortOrderClick(sortOrder: SortOrder) = viewModelScope.launch {
         preferencesManager.updateSortOrder(sortOrder)
     }
 
-    fun onHideCompletedClicked(hideCompleted: Boolean) = viewModelScope.launch {
+    fun onHideCompletedClick(hideCompleted: Boolean) = viewModelScope.launch {
         preferencesManager.updateHideCompleted(hideCompleted)
     }
 
@@ -91,6 +90,10 @@ class TasksViewModel @Inject constructor(
 
     private fun showTaskSavedConfirmationMessage(msg: String) = viewModelScope.launch {
         eventsChannel.send(TaskEvent.ShowConfirmationMethod(msg))
+    }
+
+    fun onDeleteAllCompletedClick() = viewModelScope.launch {
+        eventsChannel.send(TaskEvent.ShowDeleteAllCompletedConfirmation)
     }
 
     @ExperimentalCoroutinesApi
