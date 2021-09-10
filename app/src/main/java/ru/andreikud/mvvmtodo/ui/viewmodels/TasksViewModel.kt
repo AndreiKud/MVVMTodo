@@ -12,12 +12,14 @@ import ru.andreikud.mvvmtodo.data.PreferencesManager
 import ru.andreikud.mvvmtodo.data.SortOrder
 import ru.andreikud.mvvmtodo.data.dao.TaskDao
 import ru.andreikud.mvvmtodo.data.model.Task
+import ru.andreikud.mvvmtodo.util.Constants
 import javax.inject.Inject
 
 sealed class TaskEvent {
     object NavigateToAddTaskScreen : TaskEvent()
-    data class NavigateToEditTaskScreen(val task: Task): TaskEvent()
+    data class NavigateToEditTaskScreen(val task: Task) : TaskEvent()
     data class TaskDeleted(val task: Task) : TaskEvent()
+    data class ShowConfirmationMethod(val msg: String) : TaskEvent()
 }
 
 @HiltViewModel
@@ -74,6 +76,21 @@ class TasksViewModel @Inject constructor(
 
     fun onTaskAddClick() = viewModelScope.launch {
         eventsChannel.send(TaskEvent.NavigateToAddTaskScreen)
+    }
+
+    fun onAddEditResult(result: Int) {
+        when (result) {
+            Constants.EDIT_TASK_RESULT_OK -> {
+                showTaskSavedConfirmationMessage("Task edited")
+            }
+            Constants.ADD_TASK_RESULT_OK -> {
+                showTaskSavedConfirmationMessage("Task added")
+            }
+        }
+    }
+
+    private fun showTaskSavedConfirmationMessage(msg: String) = viewModelScope.launch {
+        eventsChannel.send(TaskEvent.ShowConfirmationMethod(msg))
     }
 
     @ExperimentalCoroutinesApi
